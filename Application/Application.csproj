@@ -9,17 +9,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Cloths\Commands\" />
-    <Folder Include="CQRS\Cloths\Queries\" />
-    <Folder Include="CQRS\Customers\Commands\" />
-    <Folder Include="CQRS\Customers\Queries\" />
-    <Folder Include="Models\" />
+    <Folder Include="CQRS\Shelves\Commands\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 
 </Project>
