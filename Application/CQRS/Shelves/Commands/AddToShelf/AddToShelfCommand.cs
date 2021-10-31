@@ -75,7 +75,7 @@ namespace Application.CQRS.Shelves.Commands.AddToShelf
                         await request.Context.SaveChangesAsync();
                     }
 
-                    //diger paltarlarindan hec biri refde deyil
+                    //other cloths are not in the shelf
                     //if (firstShelfId == 0 && lastShelfId == 0)
                     //{
                     //    Shelf shelf1 = await request.Context.Shelves.FirstOrDefaultAsync(s => s.ClothId == null);
