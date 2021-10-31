@@ -1,0 +1,219 @@
+﻿@model ShelfViewModel
+@{
+	ViewData["Title"] = "Manage Shelves";
+}
+@section Styles{
+<link rel="stylesheet" type="text/css" href="~/site/plugins/table/datatable/datatables.css">
+<link rel="stylesheet" type="text/css" href="~/site/plugins/table/datatable/dt-global_style.css">
+<link href="~/site/plugins/sweetalerts/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+<link href="~/site/plugins/sweetalerts/sweetalert.css" rel="stylesheet" type="text/css" />
+}
+<div class="layout-px-spacing">
+	<div class="row layout-top-spacing">
+		<div class="col-xl-12 col-lg-12 col-sm-12 layout-spacing">
+			<div class="widget-content widget-content-area br-6">
+
+				<form id="shelfAddForm" class="row align-items-end justify-content-between no-gutters">
+					<div class="row col-xl-9 col-lg-12 no-gutters align-items-end">
+						<div class="form-group mr-3 col-xl-4 col-lg-3 col-md-12 px-0 pr-3">
+							<label for="customerName">Customers</label>
+							<select id="getCustomer" class="form-control">
+								<option selected>Choose</option>
+								@foreach (var customer in Model.Customers)
+								{
+									<option value="@customer.Id">@customer.Name</option>
+								}
+							</select>
+						</div>
+						<div class="form-group mr-3 col-xl-4 col-lg-3 col-md-12 px-0 pr-3">
+							<label for="clothName">Cloth Name</label>
+							<select id="getCloth" class="form-control"></select>
+						</div>
+						<div class="form-group justify-content-end col-xl-4 col-lg-12 table-vertical-align">
+							<button type="submit" id="saveToShelfBtn" class="btn btn-primary mb-2 mr-2 no-hover">Save To Shelf</button>
+						</div>
+					</div>
+				</form>
+
+				<div class="table-responsive mb-4 mt-4">
+					<table id="multi-column-ordering" class="table table-hover" style="width:100%">
+						<thead>
+							<tr>
+								<th>№</th>
+								<th>Customer name</th>
+								<th>Cloth Name</th>
+								<th>Cloth Image</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var shelf in Model.ShelfModel.Shelves)
+							{
+								<tr>
+									<td>@shelf.ShelfNo</td>
+									<td>@shelf.CustomerName</td>
+									<td>@shelf.ClothName</td>
+									<td>
+										<div class="d-flex">
+											<div class="usr-img-frame mr-2 rounded-circle overflow-hidden square-img-frame">
+												<img alt="avatar" style="width: 100%; min-height: 100%; object-fit:cover" class="img-fluid" src="~/Uploads/@shelf.ClothImage" onerror="this.onerror=null;this.src='/example.svg';" />
+											</div>
+										</div>
+									</td>
+									<td class="text-center">
+										<a href=" " data-value="@shelf.Id" class="bs-tooltip emptyShelf" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></a>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+					<div id="pagination">
+						<partial name="_PaginationPartial" model="Model.ShelfModel.Pagination" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts{
+<script src="~/site/plugins/table/datatable/datatables.js"></script>
+<partial name="_ValidationScriptsPartial" />
+<script src="~/site/plugins/sweetalerts/sweetalert2.min.js"></script>
+<script>
+	$('.emptyShelf').on('click', function(e){
+		e.preventDefault();
+
+		let id = $(this).data("value");
+		let obj = {
+			Id: id
+		};
+		let formData = toFormData(obj);
+
+		swal({
+		  title: 'Are you sure?',
+		  text: "You won't be able to revert this!",
+		  type: 'warning',
+		  showCancelButton: true,
+		  confirmButtonText: 'Delete',
+		  padding: '2em'
+		}).then(function(result) {
+			if(result.value){
+				$.ajax({
+					url: "/shelf/delete",
+					data: formData,
+					cache: false,
+					contentType: false,
+					processData: false,
+					type: "post",
+					dataType: "json",
+					success: (response) => {
+						if (response.status == 200) {
+							swal({
+							  title: 'Deleted!',
+							  text: 'Your record has been deleted.',
+							  type: 'success',
+							  timer: 2000
+							})
+							setTimeout(() => {
+								window.location.reload();
+							},2000)
+						}else{
+							swal({
+								title: response.message,
+								type: 'error',
+								padding: '2em',
+								timer: 2000
+							})
+							window.location.reload;
+						}
+					}
+				});
+			}
+		})
+	});
+
+
+
+	function getCustomerCloths(customerId){
+	$.ajax({
+		url: "/cloth/ListForSelect?customerId="+customerId,
+		type: "get",
+		dataType: "json",
+		success: (response) => {
+			$("#getCloth").html(response.data);
+		}
+	});
+}
+
+	$("#getCustomer").on('change', function(e){
+		e.preventDefault();
+		let customerId = $("#getCustomer").val();
+
+		getCustomerCloths(customerId);
+	});
+
+	$("#shelfAddForm").submit((e)=>{
+		e.preventDefault();
+
+		let id = $("#getCloth").val();
+		let obj = {
+			clothId: id
+		};
+		let formData = toFormData(obj);
+
+		$.ajax({
+			url: "/shelf/add",
+			data: formData,
+			cache: false,
+			contentType: false,
+			processData: false,
+			type: "post",
+			dataType: "json",
+			success: (response) => {
+				if(response.status == 200){
+					swal({
+						title: 'The Cloth has been successfully added to the shelf!',
+						type: 'success',
+						padding: '2em',
+						timer: 2000
+					})
+					setTimeout(() => {
+						window.location.reload();
+					},2000)
+				}
+			}
+		});
+	});
+
+</script>
+<script>
+	$('#multi-column-ordering').DataTable({
+		"oLanguage": {
+			"oPaginate": { "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>', "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>' },
+			"sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+			"sSearchPlaceholder": "Axtar...",
+			"sLengthMenu": "Nəticələr :  _MENU_",
+		},
+		ordering: false,
+		paging: false,
+		info: false,
+		searching: false,
+		"stripeClasses": [],
+		"lengthMenu": [7, 10, 20, 50],
+		"pageLength": 7
+	});
+
+</script>
+    @if(TempData["AddConfirmation"]?.ToString() == "true")
+    {
+<script>
+	swal({
+		title: 'The Customer successfully added!',
+		type: 'success',
+		padding: '2em',
+		timer: 2000
+	})
+</script>
+	}
+}

@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistance
@@ -17,6 +21,11 @@ namespace Infrastructure.Persistance
         public async Task BeginTransactionAsync()
         {
             await base.Database.BeginTransactionAsync();
+        }
+
+        public async Task CustomBulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null, Type type = null, CancellationToken cancellationToken = default) where T : class
+        {
+            await this.BulkInsertAsync(entities,bulkConfig,progress,type,cancellationToken);
         }
 
         public async Task CommitAsync()

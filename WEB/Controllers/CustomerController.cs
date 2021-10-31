@@ -1,10 +1,11 @@
-﻿using Application.CQRS.Customers.Queries.GetCustomers;
+﻿using Application.Common.Base.Models;
+using Application.CQRS.Customers.Commands.AddCustomer;
+using Application.CQRS.Customers.Queries.GetCustomers;
 using Application.Models.Customers;
-using Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using MVC.Controllers;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using WEB.ViewModels;
 
 namespace WEB.Controllers
 {
@@ -13,21 +14,40 @@ namespace WEB.Controllers
         [HttpGet("customer/list")]
         public async Task<IActionResult> List()
         {
-            List<CustomerDto> customers = (await Mediator.Send(new GetCustomersQuery())).Response;
-
-            return View(customers);
+            CustomerViewModel model = new()
+            {
+                Customers = (await Mediator.Send(new GetCustomersQuery())).Response
+            };
+            return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Add(AddCustomerCommandRequestModel model)
         {
-            return View();
+            if (!ModelState.IsValid)
+            {
+                TempData["AddConfirmation"] = "false";
+                return View();
+            }
+
+            CQRSResponse<int> response = await Mediator.Send(new AddCustomerCommand(model));
+            TempData["AddConfirmation"] = "true";
+            return RedirectToAction("List","Customer");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> Delete(int id)
         {
-            return View();
+            if(id == 0)
+                return Json(new { status = 500 , message = "Internal Server error!"});
+
+            CQRSResponse<int> response = await Mediator.Send(new DeleteCustomerCommand(id));
+
+            if (response == null)
+                return Json(new { status = 500, message = "Internal Server error!" });
+
+            return Json(response);
         }
     }
 }

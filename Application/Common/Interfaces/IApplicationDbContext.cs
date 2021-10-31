@@ -1,6 +1,10 @@
 ﻿using Domain.Entities;
-using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Common.Interfaces
 {
@@ -15,5 +19,6 @@ namespace Application.Common.Interfaces
         Task BeginTransactionAsync();
         Task SaveChangesAsync();
         bool IsCurrentTransactionNull();
+        Task CustomBulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, Action<decimal> progress = null, Type type = null, CancellationToken cancellationToken = default(CancellationToken)) where T : class;
     }
 }

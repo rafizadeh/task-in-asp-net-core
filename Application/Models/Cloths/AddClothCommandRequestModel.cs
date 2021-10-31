@@ -1,4 +1,5 @@
 ﻿using Application.Common.Base.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Models.Cloths
 {
@@ -6,6 +7,6 @@ namespace Application.Models.Cloths
     {
         public string Name { get; set; }
         public int CustomerId { get; set; }
-        public ImageFile Image { get; set; }
+        public IFormFile Image { get; set; }
     }
 }

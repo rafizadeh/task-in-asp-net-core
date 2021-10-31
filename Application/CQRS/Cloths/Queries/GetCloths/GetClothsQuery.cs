@@ -12,31 +12,20 @@ namespace Application.CQRS.Cloths.Queries.GetCloths
     public class GetClothsQuery : BaseRequest<List<ClothDto>>
     {
         public int CustomerId { get; set; }
-        public GetClothsQuery(int customerId) => CustomerId = customerId;
+        public GetClothsQuery(int customerId = 0) => CustomerId = customerId;
         public class GetClothQueryHandler : IBaseRequestHandler<GetClothsQuery, List<ClothDto>>
         {
             public async Task<CQRSResponse<List<ClothDto>>> Handle(GetClothsQuery request, CancellationToken cancellationToken)
             {
-                if(request.CustomerId == 0)
+                List<ClothDto> customers = await request.Context.Cloths.Where(c => request.CustomerId == 0 || (c.CustomerId == request.CustomerId && c.Shelf == null)).Select(c => new ClothDto
                 {
-                    List<ClothDto> customers = await request.Context.Cloths.Select(c => new ClothDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        Image = c.Image
-                    }).ToListAsync(cancellationToken: cancellationToken);
+                    Id = c.Id,
+                    Name = c.Name,
+                    Image = c.Image,
+                    CustomerName = c.Customer.Name
+                }).ToListAsync(cancellationToken: cancellationToken);
 
-                    return new CQRSResponse<List<ClothDto>>(customers);
-                }
-                else
-                {
-                    List<ClothDto> customers = await request.Context.Cloths.Select(c => new ClothDto
-                    {
-                        Name = c.Name,
-                    }).ToListAsync(cancellationToken: cancellationToken);
-
-                    return new CQRSResponse<List<ClothDto>>(customers);
-                }
+                return new CQRSResponse<List<ClothDto>>(customers);
             }
         }
     }

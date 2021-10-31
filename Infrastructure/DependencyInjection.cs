@@ -18,6 +18,7 @@ namespace Infrastructure
                 string whichConnection = configuration["Database:Connected"];
                 options.UseSqlServer(configuration[$"Database:{whichConnection}"]);
             });
+            services.LoadInitialEntities();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             return services;

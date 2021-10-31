@@ -1,14 +1,10 @@
-﻿@model List<CustomerDto>
+﻿@model CustomerViewModel
 @{
 	ViewData["Title"] = "Dashboard";
 }
 @section Styles{
-<link href="~/site/assets/css/users/account-setting.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" type="text/css" href="~/site/plugins/table/datatable/datatables.css">
-<link rel="stylesheet" type="text/css" href="~/site/assets/css/forms/theme-checkbox-radio.css">
 <link rel="stylesheet" type="text/css" href="~/site/plugins/table/datatable/dt-global_style.css">
-<link rel="stylesheet" type="text/css" href="~/site/plugins/loaders/custom-loader.css">
-<link href="~/site/plugins/dropify/dropify.min.css" rel="stylesheet" type="text/css">
 <link href="~/site/plugins/sweetalerts/sweetalert2.min.css" rel="stylesheet" type="text/css" />
 <link href="~/site/plugins/sweetalerts/sweetalert.css" rel="stylesheet" type="text/css" />
 }
@@ -32,14 +28,14 @@
 						<tbody>
 							@{
 								int counter = 1;
-								foreach (var customer in Model)
+								foreach (var customer in Model.Customers)
 								{
 									<tr>
 										<td>@(counter++)</td>
 										<td>@customer?.Name</td>
 										<td>@customer?.Phone</td>
 										<td class="text-center">
-											<a asp-controller="Customer" asp-action="Delete" asp-route-id="@customer?.Id" class="bs-tooltip" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></a>
+											<a href=" " data-value="@customer.Id" class="bs-tooltip deleteCustomer" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></a>
 										</td>
 									</tr>
 								}
@@ -51,7 +47,6 @@
 		</div>
 	</div>
 </div>
-
 
 <form asp-controller="Customer" asp-action="Add" class="modal fade bd-example-modal-lg" id="addCustomerModalForm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" style="display: none;" aria-hidden="true">
 	<div class="modal-dialog modal-lg" role="document">
@@ -69,15 +64,15 @@
 								<div class="col-sm-12">
 									<div class="form-group">
 										<label for="customerName" class="col-form-label col-form-label-sm">Fullname</label>
-										<input autocomplete="off" maxlength="200" type="text" id="customerName" class="form-control" />
-										<span class="custom-invalid-input"></span>
+										<input asp-for="Name" autocomplete="off" type="text" id="customerName" class="form-control" />
+										<span asp-validation-for="Name" class="custom-invalid-input"></span>
 									</div>
 								</div>
 								<div class="col-sm-12">
 									<div class="form-group">
 										<label for="customerNumber" class="col-form-label col-form-label-sm">PhoneNumber</label>
-										<input autocomplete="off" maxlength="300" type="number" id="customerNumber" class="form-control" />
-										<span class="custom-invalid-input"></span>
+										<input asp-for="Phone" autocomplete="off" type="number" id="customerNumber" class="form-control" />
+										<span asp-validation-for="Phone" class="custom-invalid-input"></span>
 									</div>
 								</div>
 							</div>
@@ -94,14 +89,66 @@
 	</div>
 </form>
 
-
 @section Scripts{
 <script src="~/site/plugins/table/datatable/datatables.js"></script>
-<script src="~/site/plugins/dropify/dropify.min.js"></script>
-<script src="~/site/assets/js/users/account-settings.js"></script>
 <partial name="_ValidationScriptsPartial" />
 <script src="~/site/plugins/sweetalerts/sweetalert2.min.js"></script>
-<script src="~/site/plugins/sweetalerts/custom-sweetalert.js"></script>
+	<script>
+	$('.deleteCustomer').on('click', function(e){
+		e.preventDefault();
+
+		let id = $(this).data("value");
+		var obj = {
+			Id: id
+		};
+		let formData = toFormData(obj);
+
+		swal({
+		  title: 'Are you sure?',
+		  text: "You won't be able to revert this!",
+		  type: 'warning',
+		  showCancelButton: true,
+		  confirmButtonText: 'Delete',
+		  padding: '2em'
+		}).then(function(result) {
+			if(result.value){
+				$.ajax({
+					url: "/customer/delete",
+					headers: {
+						RequestVerificationToken: $("input[name=__RequestVerificationToken]").val()
+							 },
+					data: formData,
+					cache: false,
+					contentType: false,
+					processData: false,
+					type: "post",
+					dataType: "json",
+					success: (response) => {
+						if (response.status == 200) {
+							swal({
+							  title: 'Deleted!',
+							  text: 'Your record has been deleted.',
+							  type: 'success',
+							  timer: 2000
+							})
+							setTimeout(() => {
+								window.location.reload();
+							},2000)
+						}else{
+							swal({
+							    title: response.message,
+							    type: 'error',
+							    padding: '2em',
+							    timer: 2000
+							})
+							window.location.reload;
+						}
+					}
+				});
+			}
+		})
+	})
+</script>
 <script>
 	$('#multi-column-ordering').DataTable({
 		"oLanguage": {
@@ -116,17 +163,19 @@
 		searching: false,
 		"stripeClasses": [],
 		"lengthMenu": [7, 10, 20, 50],
-		"pageLength": 7,
-		columnDefs: [{
-			targets: [0],
-			orderData: [0, 1]
-		}, {
-			targets: [1],
-			orderData: [1, 0]
-		}, {
-			targets: [4],
-			orderData: [4, 0]
-		}]
+		"pageLength": 7
 	});
+
 </script>
+    @if(TempData["AddConfirmation"]?.ToString() == "true")
+    {
+<script>
+	swal({
+		title: 'The Customer successfully added!',
+		type: 'success',
+		padding: '2em',
+		timer: 2000
+	})
+</script>
+	}
 }

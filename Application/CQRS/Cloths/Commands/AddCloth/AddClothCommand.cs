@@ -1,7 +1,9 @@
 ﻿using Application.Common.Base;
 using Application.Common.Base.Models;
+using Application.Common.Extensions;
 using Application.Models.Cloths;
 using Domain.Entities;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,15 +25,27 @@ namespace Application.CQRS.Cloths.Commands.AddCloth
                 };
                 AddClothCommandRequestModel model = request.Model;
 
-                Cloth cloth = new()
+                if (model.Image.IsImage())
                 {
-                    Name = model.Name,
-                    Image = model.Image.File.FileName,
-                    CustomerId = model.CustomerId
-                };
+                    string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    string fileName = await model.Image.SaveAsAsync(path);
 
-                await request.Context.Cloths.AddAsync(cloth, cancellationToken);
-                await request.Context.SaveChangesAsync();
+                    Cloth cloth = new()
+                    {
+                        Name = model.Name,
+                        Image = fileName,
+                        CustomerId = model.CustomerId
+                    };
+
+                    await request.Context.Cloths.AddAsync(cloth, cancellationToken);
+                    await request.Context.SaveChangesAsync();
+                }
+                else
+                {
+                    response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                    response.Message = "File is not in a proper format.";
+                    return response;
+                }
 
                 return response;
             }

@@ -1,0 +1,235 @@
+﻿@model ClothViewModel
+@{
+	ViewData["Title"] = "Cloths";
+}
+
+@section Styles{
+<link rel="stylesheet" type="text/css" href="~/site/plugins/table/datatable/datatables.css">
+<link rel="stylesheet" type="text/css" href="~/site/plugins/table/datatable/dt-global_style.css">
+<link rel="stylesheet" type="text/css" href="~/site/assets/css/users/account-setting.css" />
+<link rel="stylesheet" type="text/css" href="~/site/plugins/dropify/dropify.min.css">
+<link rel="stylesheet" type="text/css" href="~/site/plugins/sweetalerts/sweetalert2.min.css" />
+<link rel="stylesheet" type="text/css" href="~/site/plugins/sweetalerts/sweetalert.css" />
+}
+<div class="layout-px-spacing">
+	<div class="row layout-top-spacing">
+		<div class="col-xl-12 col-lg-12 col-sm-12 layout-spacing">
+			<div class="widget-content widget-content-area br-6">
+				<div class="w-100 px-3">
+					<a data-target="#addClothModalForm" data-toggle="modal" id="addCloth" class="btn btn-outline-primary no-hover"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>  Add Cloth </a>
+				</div>
+				<div class="table-responsive mb-4 mt-4">
+					<table id="multi-column-ordering" class="table table-hover" style="width:100%">
+						<thead>
+							<tr>
+								<th>№</th>
+								<th>Cloth name</th>
+								<th>Owner name</th>
+								<th>Image</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							@{
+								int counter = 1;
+								foreach (var cloth in Model.Cloths)
+								{
+									<tr>
+										<td>@(counter++)</td>
+										<td>@cloth.Name</td>
+										<td>@cloth.CustomerName</td>
+										<td>
+											<div class="d-flex">
+												<div class="usr-img-frame mr-2 rounded-circle overflow-hidden square-img-frame">
+													<img alt="avatar" style="width: 100%; min-height: 100%; object-fit:cover" class="img-fluid" src="~/Uploads/@cloth.Image" onerror="this.onerror=null;this.src='/example.svg';" />
+												</div>
+											</div>
+										</td>
+										<td class="text-center">
+											<a href=" " data-value="@cloth.Id" class="bs-tooltip deleteCloth" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></a>
+										</td>
+									</tr>
+								}
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<form class="modal fade bd-example-modal-lg" id="addClothModalForm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" style="display: none;" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+				</button>
+			</div>
+			<div class="modal-body general-info">
+				<div class="w-100 info">
+					<div class="row">
+						<div class="col-xl-4 col-lg-12 col-md-4">
+							<div class="upload mt-4 pr-md-4">
+								<label class="custom-file-container__custom-file">
+									<input type="file" id="mainPhoto" accept="image/png, image/jpeg, image/jpg, image/heic"
+										   data-allowed-file-extensions="jpg heic png jpeg" class="dropify" data-max-file-size="5M" />
+								</label>
+							</div>
+						</div>
+						<div class="col-xl-8 col-lg-12 col-md-8 mt-md-0 mt-4">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+										<label for="clothName" class="col-form-label col-form-label-sm">Item name</label>
+										<input asp-for="Name" autocomplete="off" type="text" id="clothName" class="form-control" />
+										<span asp-validation-for="Name" class="custom-invalid-input"></span>
+									</div>
+								</div>
+								<div class="col-sm-12">
+									<div class="form-group">
+										<label for="customerName" class="col-form-label col-form-label-sm">Customer Name </label>
+										<select asp-for="CustomerId" id="CustomerId" class="form-control">
+											<option selected>Choose</option>
+											@foreach (var customer in Model.Customers)
+											{
+												<option value="@customer.Id">@customer.Name</option>
+											}
+										</select>
+										<span asp-validation-for="CustomerId" class="custom-invalid-input"></span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button class="btn no-hover" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Cancel </button>
+				<button type="submit" id="addAdvertisementBtn" class="btn btn-primary no-hover">Save</button>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section Scripts{
+<script src="~/site/plugins/table/datatable/datatables.js"></script>
+<script src="~/site/plugins/dropify/dropify.min.js"></script>
+<script src="~/site/assets/js/users/account-settings.js"></script>
+<script src="~/site/plugins/bootstrap-maxlength/bootstrap-maxlength.js"></script>
+<partial name="_ValidationScriptsPartial" />
+<script src="~/site/plugins/sweetalerts/sweetalert2.min.js"></script>
+<script>
+	$('.deleteCloth').on('click', function(e){
+		e.preventDefault();
+
+		let id = $(this).data("value");
+		var obj = {
+			Id: id
+		};
+
+		let formData = toFormData(obj);
+
+		swal({
+		  title: 'Are you sure?',
+		  text: "You won't be able to revert this!",
+		  type: 'warning',
+		  showCancelButton: true,
+		  confirmButtonText: 'Delete',
+		  padding: '2em'
+		}).then(function(result) {
+			if(result.value){
+				$.ajax({
+					url: "/cloth/delete",
+					data: formData,
+					cache: false,
+					contentType: false,
+					processData: false,
+					type: "post",
+					dataType: "json",
+					success: (response) => {
+						if (response.status == 200) {
+							swal({
+							  title: 'Deleted!',
+							  text: 'Your record has been deleted.',
+							  type: 'success',
+							  timer: 2000
+							})
+							setTimeout(() => {
+								window.location.reload();
+							},2000)
+						}else{
+							swal({
+								title: response.message,
+								type: 'error',
+								padding: '2em',
+								timer: 2000
+							})
+							window.location.reload;
+						}
+					}
+				});
+			}
+		})
+	})
+
+</script>
+<script>
+	$('#multi-column-ordering').DataTable({
+		"oLanguage": {
+			"oPaginate": { "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>', "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>' },
+			"sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+			"sSearchPlaceholder": "Axtar...",
+			"sLengthMenu": "Nəticələr :  _MENU_",
+		},
+		ordering: false,
+		paging: false,
+		info: false,
+		searching: false,
+		"stripeClasses": [],
+		"lengthMenu": [7, 10, 20, 50],
+		"pageLength": 7
+	});
+
+	$("#addClothModalForm").submit(function(e) {
+		e.preventDefault();
+		var addedImage = document.getElementById("mainPhoto").files[0];
+
+		let addedObj = {
+			Name: $("#clothName").val(),
+			CustomerId: $("#CustomerId").val(),
+			Image: addedImage
+		}
+
+		let formData = toFormData(addedObj);
+		if($("#addClothModalForm").valid()){
+			$.ajax({
+			url: "/cloth/add",
+			data: formData,
+			cache: false,
+			contentType: false,
+			processData: false,
+			type: "post",
+			dataType: "json",
+			success: function (response){
+				swal({
+					title: response.message,
+					type: (response.status == 200) ? 'success' : 'error',
+					padding: '2em',
+					timer: 2000
+				}).then(function () {
+					if (response.status == 200) {
+						window.location.href = "/cloths/list";
+					} else {
+						window.location.reload;
+					}
+				});
+			}
+		});
+	}
+});
+
+</script>
+}

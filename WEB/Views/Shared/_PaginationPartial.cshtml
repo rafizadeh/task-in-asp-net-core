@@ -1,0 +1,39 @@
+﻿@using Application.Common.Extensions
+@model  Application.Common.Base.Models.PaginationModel
+
+@{ int pageCount = Model.PageCount;
+
+    string url(int page = 1)
+    {
+        string pageOnUrl = page > 1 ? $"/{page}" : "";
+        return $"{Context.GetPath()}{pageOnUrl}";
+    }
+
+    string pointer_events(int page)
+    {
+        return Model.Page == page ? " style=pointer-events:none;" : "";
+    } 
+}
+
+@if (pageCount > 1)
+{
+<div class="row no-gutters">
+    <div class="col-sm-12 col-md-12">
+        <div class="dataTables_paginate paging_simple_numbers" id="multi-column-ordering_paginate">
+            <ul class="pagination justify-content-center">
+                <li class="paginate_button page-item previous" id="multi-column-ordering_previous">
+                    <a href="@url(Model.Prev)" data-page="@Model.Prev" @pointer_events(1) aria-controls="multi-column-ordering" data-dt-idx="0" tabindex="0" class="page-link"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></a>
+                </li>
+                @for (int i = Model.StartIndex; i <= Model.EndIndex; i++)
+                {
+                    <li class="paginate_button page-item@(i == Model.Page ? " active" : "")"><a data-page="@i" href="@url(i)" aria-controls="multi-column-ordering" data-dt-idx="2" tabindex="0" class="page-link">@i</a></li>
+                }
+
+                <li class="paginate_button page-item next" id="multi-column-ordering_next">
+                    <a href="@url(Model.Next)" data-page="@Model.Next" aria-controls="multi-column-ordering" data-dt-idx="3" tabindex="0" class="page-link" @pointer_events(pageCount)><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+}

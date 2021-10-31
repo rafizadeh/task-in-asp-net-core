@@ -1,6 +1,7 @@
 ﻿using Application.Common.Base;
 using Application.Common.Base.Models;
 using Domain.Entities;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +32,9 @@ namespace Application.CQRS.Cloths.Commands.DeleteCloth
                         Message = "There is not such kind of Cloth record!"
                     };
                 }
+
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                File.Delete(@$"{path}\{deletedCloth.Image}");
 
                 request.Context.Cloths.Remove(deletedCloth);
                 await request.Context.SaveChangesAsync();
